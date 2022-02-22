@@ -18,19 +18,24 @@ namespace CarRentals.Models
             {
                 return true;
             }
-            return Type == ((Car)obj).Type;
+            return LicensePlate == ((Car)obj).LicensePlate;
         }
     }
 
     public class CarValidator : AbstractValidator<Car>
     {
         public CarValidator()
-        {
+        {           
             RuleFor(x => x.Brand).NotEmpty();
-            RuleFor(x => x.Model).NotEmpty();
-            RuleFor(x => x.LicensePlate).NotEmpty();
             RuleFor(x => x.Id).NotEmpty();
-            RuleFor(x => x.Type).NotEmpty();
+            RuleFor(x => x.LicensePlate)
+                .NotEmpty()
+                .MinimumLength(6);
+            RuleFor(x => x.Model)
+                .NotEmpty();
+            RuleFor(x => x.Type)
+                .NotEmpty()
+                .MinimumLength(3);
         }
     }
 }
