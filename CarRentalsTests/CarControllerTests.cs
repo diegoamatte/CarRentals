@@ -13,11 +13,11 @@ namespace CarRentalsTests
 {
     public class CarControllerTests
     {
-        private Mock<ICarService> _carService;
-        private CarsController _carController;
-
-        private Guid _validId;
+        private readonly Mock<ICarService> _carService;
+        private readonly CarsController _carController;
+        private readonly Guid _validId;
         private readonly Car _testCar; 
+
         public static IEnumerable<object[]> InvalidId =>
             new List<object[]>
             {
@@ -136,7 +136,7 @@ namespace CarRentalsTests
         }
 
         [Fact]
-        public async Task DeleteCar_ReturnsNotFound_WhenArgumentExceptionIsCatched()
+        public void DeleteCar_ReturnsNotFound_WhenArgumentExceptionIsCatched()
         {
             //Arrange
             var invalidId = Guid.NewGuid();
