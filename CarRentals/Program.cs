@@ -1,6 +1,7 @@
 using CarRentals.Models;
 using CarRentals.Services;
-using FluentValidation;
+using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -9,7 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddFluentValidation(options =>
+    {
+        options.ImplicitlyValidateChildProperties = true;
+        options.ImplicitlyValidateRootCollectionElements = true;
+        options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -25,6 +32,8 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
+builder.Services.AddFluentValidationRulesToSwagger();
+
 //Add in memory Database
 builder.Services.AddDbContext<CarRentalDbContext>(options =>
 {
@@ -35,7 +44,6 @@ builder.Services.AddScoped<ICarRentalDbContext>(provider => provider.GetService<
 
 builder.Services.AddScoped<ICarService, CarService>();
 
-builder.Services.AddTransient<IValidator<Car>, CarValidator>();
 
 var app = builder.Build();
 
