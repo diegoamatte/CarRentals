@@ -19,7 +19,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(options =>
 
 builder.Services.AddScoped<ICarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
 
-builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<IService<Car>, CarService>();
 
 builder.Services.AddTransient<IValidator<Car>, CarValidator>();
 

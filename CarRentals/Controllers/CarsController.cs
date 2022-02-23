@@ -16,9 +16,9 @@ namespace CarRentals.Controllers
     public class CarsController : ControllerBase
     {
 
-        private readonly ICarService _carService;
+        private readonly IService<Car> _carService;
 
-        public CarsController(ICarService carService)
+        public CarsController(IService<Car> carService)
         {
             _carService = carService;
         }
@@ -27,14 +27,14 @@ namespace CarRentals.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
-            return Ok(await _carService.GetCars());
+            return Ok(await _carService.GetAsync());
         }
 
         // GET: api/Cars/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Car>> GetCar(Guid id)
         {
-            var car = await _carService.GetCarById(id);
+            var car = await _carService.GetByIdAsync(id);
             if(car == null)
                 return NotFound();
             return Ok(car);
@@ -47,7 +47,7 @@ namespace CarRentals.Controllers
         {
             try
             {
-                var updatedCar = _carService.UpdateCar(id, car);
+                var updatedCar = _carService.UpdateAsync(id, car);
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace CarRentals.Controllers
         [HttpPost]
         public async Task<ActionResult<Car>> PostCar(Car car)
         {
-            await _carService.SaveCar(car);
+            await _carService.SaveAsync(car);
             return CreatedAtAction("GetCar", new { car.Id }, car);
         }
 
@@ -71,7 +71,7 @@ namespace CarRentals.Controllers
         {
             try
             {
-                await _carService.DeleteCar(id);
+                await _carService.DeleteAsync(id);
             }
             catch (ArgumentException ex)
             {
