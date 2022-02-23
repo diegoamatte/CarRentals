@@ -4,10 +4,15 @@ namespace CarRentals.Models
 {
     public class Car
     {
+        /// <example>49ab41c6-7110-4795-a88e-1e452f10b61f</example>
         public Guid? Id { get; set; }
+        /// <example>ABC 123 CD</example>
         public string LicensePlate { get; set; }
+        /// <example>Honda</example>
         public string Brand { get; set; }
+        /// <example>CR-V</example>
         public string Model { get; set; }
+        /// <example>SUV</example>
         public string Type { get; set; }
 
         public override bool Equals(object? obj)
