@@ -12,19 +12,19 @@ namespace CarRentals.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Car>> GetCars()
+        public async Task<IEnumerable<Car>> GetCarsAsync()
         {
             return await _context.Cars.ToListAsync();
         }
 
-        public async Task<Car> GetCarById(Guid id)
+        public async Task<Car> GetCarByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id));
             return await _context.Cars.SingleOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<Car> SaveCar(Car car)
+        public async Task<Car> SaveCarAsync(Car car)
         {
             car.Id = Guid.NewGuid();
             _context.Cars.Add(car);
@@ -32,7 +32,7 @@ namespace CarRentals.Services
             return car;
         }
 
-        public async Task<Car> UpdateCar(Guid id, Car car)
+        public async Task<Car> UpdateCarAsync(Guid id, Car car)
         {
             if(!CarExists(id))
                 throw new ArgumentException(nameof(id));
@@ -54,7 +54,7 @@ namespace CarRentals.Services
             return car;
         }
 
-        public async Task DeleteCar(Guid id)
+        public async Task DeleteCarAsync(Guid id)
         {
             var car = await _context.Cars.FindAsync(id);
             if (car == null)
