@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using CarRentals.Models;
 
 namespace CarRentals.Models
 {
@@ -10,6 +9,6 @@ namespace CarRentals.Models
         {
         }
         public DbSet<Car> Cars { get; set; }
-        public DbSet<Client> Client { get; set; }
+        public DbSet<Client> Clients { get; set; }
     }
 }

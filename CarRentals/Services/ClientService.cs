@@ -12,29 +12,29 @@ namespace CarRentals.Services
         }
         public async Task DeleteAsync(Guid id)
         {
-            var client = await _context.Client.FindAsync(id);
+            var client = await _context.Clients.FindAsync(id);
             if (client == null)
                 throw new ArgumentException();
-            _context.Client.Remove(client);
+            _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Client>> GetAsync()
         {
-            return await _context.Client.ToListAsync();
+            return await _context.Clients.ToListAsync();
         }
 
         public async Task<Client> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id));
-            return await _context.Client.SingleOrDefaultAsync(c => c.Id == id);
+            return await _context.Clients.SingleOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Client> SaveAsync(Client client)
         {
             client.Id = Guid.NewGuid();
-            _context.Client.Add(client);
+            _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             return client;
         }
@@ -63,7 +63,7 @@ namespace CarRentals.Services
 
         private bool ClientExists(Guid id)
         {
-            return _context.Client.Any(e => e.Id == id);
+            return _context.Clients.Any(e => e.Id == id);
         }
     }
 }
