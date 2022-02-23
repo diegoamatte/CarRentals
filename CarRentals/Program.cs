@@ -11,15 +11,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//Add in memory Database
-builder.Services.AddDbContext<CarRentalDbContext>(options =>
-{
-    options.UseInMemoryDatabase("Cars");
-});
 
-builder.Services.AddScoped<ICarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
+builder.Services.AddDbContext<CarRentalDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Cars")));
+
+//builder.Services.AddScoped<CarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
 
 builder.Services.AddScoped<IService<Car>, CarService>();
+builder.Services.AddScoped<IService<Client>, ClientService>();
 
 builder.Services.AddTransient<IValidator<Car>, CarValidator>();
 
