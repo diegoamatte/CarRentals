@@ -17,7 +17,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(options =>
     options.UseInMemoryDatabase("Cars");
 });
 
-builder.Services.AddScoped<ICarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
+builder.Services.AddScoped<CarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
 
 builder.Services.AddScoped<IService<Car>, CarService>();
 
