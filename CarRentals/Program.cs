@@ -1,5 +1,6 @@
 using CarRentals.Models;
 using CarRentals.Services;
+using CarRentals.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CarRentalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Cars")));
 
-//builder.Services.AddScoped<CarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
 
 builder.Services.AddScoped<IService<Car>, CarService>();
 builder.Services.AddScoped<IService<Client>, ClientService>();
