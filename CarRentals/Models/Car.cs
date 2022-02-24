@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-
-namespace CarRentals.Models
+﻿namespace CarRentals.Models
 {
     public class Car
     {
@@ -9,6 +7,7 @@ namespace CarRentals.Models
         public string Brand { get; set; }
         public string Model { get; set; }
         public string Type { get; set; }
+        public CarState State { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -19,24 +18,6 @@ namespace CarRentals.Models
                 return true;
             }
             return LicensePlate == ((Car)obj).LicensePlate;
-        }
-    }
-
-    public class CarValidator : AbstractValidator<Car>
-    {
-        public CarValidator()
-        {
-            RuleFor(x => x.Brand)
-                .NotEmpty();
-            RuleFor(x => x.Model)
-                .NotEmpty();
-            RuleFor(x => x.LicensePlate)
-                .NotEmpty()
-                .Matches("[A-Z]{3}-[0-9]{3}|[A-Z]{2}-[0-9]{3}-[A-Z]{2}");
-            RuleFor(x => x.Id)
-                .NotEmpty();
-            RuleFor(x => x.Type)
-                .NotEmpty();
         }
     }
 }
