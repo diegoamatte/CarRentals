@@ -10,5 +10,6 @@ namespace CarRentals.Models
         }
         public DbSet<Car> Cars { get; set; }
         public DbSet<Client> Clients { get; set; }
+        public DbSet<Rental> Rentals { get; set; }
     }
 }
