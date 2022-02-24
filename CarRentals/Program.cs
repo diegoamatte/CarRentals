@@ -19,6 +19,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(options =>
 
 builder.Services.AddScoped<IService<Car>, CarService>();
 builder.Services.AddScoped<IService<Client>, ClientService>();
+builder.Services.AddScoped<IService<Rental>, RentalService>();
 
 builder.Services.AddTransient<IValidator<Car>, CarValidator>();
 
