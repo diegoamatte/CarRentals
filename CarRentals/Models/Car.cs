@@ -25,17 +25,18 @@ namespace CarRentals.Models
     public class CarValidator : AbstractValidator<Car>
     {
         public CarValidator()
-        {           
-            RuleFor(x => x.Brand).NotEmpty();
-            RuleFor(x => x.Id).NotEmpty();
-            RuleFor(x => x.LicensePlate)
-                .NotEmpty()
-                .MinimumLength(6);
+        {
+            RuleFor(x => x.Brand)
+                .NotEmpty();
             RuleFor(x => x.Model)
                 .NotEmpty();
-            RuleFor(x => x.Type)
+            RuleFor(x => x.LicensePlate)
                 .NotEmpty()
-                .MinimumLength(3);
+                .Matches("[A-Z]{3}-[0-9]{3}|[A-Z]{2}-[0-9]{3}-[A-Z]{2}");
+            RuleFor(x => x.Id)
+                .NotEmpty();
+            RuleFor(x => x.Type)
+                .NotEmpty();
         }
     }
 }
