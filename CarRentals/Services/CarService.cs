@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarRentals.Services
 {
-    public class CarService : ICarService
+    public class CarService : IService<Car>
     {
         private readonly CarRentalDbContext _context;
         public CarService(CarRentalDbContext context)
@@ -12,19 +12,19 @@ namespace CarRentals.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Car>> GetCarsAsync()
+        public async Task<IEnumerable<Car>> GetAsync()
         {
             return await _context.Cars.ToListAsync();
         }
 
-        public async Task<Car> GetCarByIdAsync(Guid id)
+        public async Task<Car> GetByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
                 throw new ArgumentNullException(nameof(id));
             return await _context.Cars.SingleOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<Car> SaveCarAsync(Car car)
+        public async Task<Car> SaveAsync(Car car)
         {
             car.Id = Guid.NewGuid();
             _context.Cars.Add(car);
@@ -32,7 +32,7 @@ namespace CarRentals.Services
             return car;
         }
 
-        public async Task<Car> UpdateCarAsync(Guid id, Car car)
+        public async Task<Car> UpdateAsync(Guid id, Car car)
         {
             if(!CarExists(id))
                 throw new ArgumentException(nameof(id));
@@ -54,7 +54,7 @@ namespace CarRentals.Services
             return car;
         }
 
-        public async Task DeleteCarAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
             var car = await _context.Cars.FindAsync(id);
             if (car == null)

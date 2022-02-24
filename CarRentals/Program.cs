@@ -33,17 +33,13 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddFluentValidationRulesToSwagger();
-
-//Add in memory Database
-builder.Services.AddDbContext<CarRentalDbContext>(options =>
-{
-    options.UseInMemoryDatabase("Cars");
-});
-
-builder.Services.AddScoped<ICarRentalDbContext>(provider => provider.GetService<CarRentalDbContext>());
-
 builder.Services.AddScoped<ICarService, CarService>();
 
+
+builder.Services.AddDbContext<CarRentalDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Cars")));
+builder.Services.AddScoped<IService<Car>, CarService>();
+builder.Services.AddScoped<IService<Client>, ClientService>();
 
 var app = builder.Build();
 

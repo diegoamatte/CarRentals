@@ -25,8 +25,10 @@ namespace CarRentals.Models
     public class CarValidator : AbstractValidator<Car>
     {
         public CarValidator()
-        {           
+        {
             RuleFor(x => x.Brand).NotEmpty();
+            RuleFor(x => x.Model).NotEmpty();
+            RuleFor(x => x.LicensePlate).NotEmpty();
             RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.LicensePlate)
                 .NotEmpty()
