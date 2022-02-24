@@ -33,8 +33,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddFluentValidationRulesToSwagger();
-builder.Services.AddScoped<ICarService, CarService>();
-
 
 builder.Services.AddDbContext<CarRentalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Cars")));
