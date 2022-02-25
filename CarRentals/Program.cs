@@ -5,6 +5,9 @@ using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Microsoft.AspNetCore.Http.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +19,12 @@ builder.Services.AddControllers()
         options.ImplicitlyValidateChildProperties = true;
         options.ImplicitlyValidateRootCollectionElements = true;
         options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-    });
+    })
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+//builder.Services.Configure<JsonOptions>(options => 
+//    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -27,7 +35,6 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Rent a Car API",
         Description = "An API made for concepts practice",
     });
-    
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
