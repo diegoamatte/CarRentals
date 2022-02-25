@@ -50,7 +50,7 @@ namespace CarRentals.Controllers
         /// <param name="id"></param>
         /// <param name="car"></param>
         /// <response code="204">Successful operation.</response>
-        /// <response code="400">Validation or malformed request.</response>
+        /// <response code="400">Validation error or malformed request.</response>
         /// <response code="404">Car not found.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpPut("{id}")]
@@ -73,7 +73,7 @@ namespace CarRentals.Controllers
         /// Adds a new car.
         /// </summary>
         /// <param name="car"></param>
-        /// <response code="201">Succesfully created car.</response>
+        /// <response code="201">Successfully created car.</response>
         /// <response code="400">Validation problem.</response>
         [ProducesResponseType(typeof(Car), StatusCodes.Status201Created)]
         [HttpPost]
