@@ -2,6 +2,6 @@
 {
     public enum CarState
     {
-        Available, Damaged, Rented
+        Available, Damaged
     }
 }

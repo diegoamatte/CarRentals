@@ -9,7 +9,8 @@ namespace CarRentals.Validators
         public CarValidator()
         {
             RuleFor(x => x.Brand)
-                .NotEmpty();
+                .NotEmpty()
+                .MinimumLength(2);
             RuleFor(x => x.Model)
                 .NotEmpty();
             RuleFor(x => x.LicensePlate)
