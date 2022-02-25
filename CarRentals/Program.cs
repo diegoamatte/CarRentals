@@ -38,6 +38,7 @@ builder.Services.AddDbContext<CarRentalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Cars")));
 builder.Services.AddScoped<IService<Car>, CarService>();
 builder.Services.AddScoped<IService<Client>, ClientService>();
+builder.Services.AddScoped<IService<Rental>, RentalService>();
 
 var app = builder.Build();
 
