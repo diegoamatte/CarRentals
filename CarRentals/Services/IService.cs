@@ -8,6 +8,6 @@ namespace CarRentals.Services
         Task<T> GetByIdAsync(Guid id);
         Task<IEnumerable<T>> GetAsync();
         Task<T> SaveAsync(T t);
-        Task<T> UpdateAsync(Guid id, T t);
+        Task UpdateAsync(Guid id, T t);
     }
 }

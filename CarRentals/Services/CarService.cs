@@ -1,72 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CarRentals.Models;
 using Microsoft.EntityFrameworkCore;
+using CarRentals.Repositories;
 
 namespace CarRentals.Services
 {
     public class CarService : IService<Car>
     {
-        private readonly CarRentalDbContext _context;
-        public CarService(CarRentalDbContext context)
+        private IRepository<Car> _carRepository;
+
+        public CarService(IRepository<Car> repository)
         {
-            _context = context;
+            _carRepository = repository;
         }
 
         public async Task<IEnumerable<Car>> GetAsync()
         {
-            return await _context.Cars.ToListAsync();
+            return await _carRepository.GetAsync();
         }
 
         public async Task<Car> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty)
-                throw new ArgumentNullException(nameof(id));
-            return await _context.Cars.SingleOrDefaultAsync(c => c.Id == id);
+            return await _carRepository.GetByIDAsync(id);
         }
 
         public async Task<Car> SaveAsync(Car car)
         {
             car.Id = Guid.NewGuid();
-            _context.Cars.Add(car);
-            await _context.SaveChangesAsync();
+            await _carRepository.SaveAsync(car);
             return car;
         }
 
-        public async Task<Car> UpdateAsync(Guid id, Car car)
+        public async Task UpdateAsync(Guid id, Car car)
         {
-            if(!CarExists(id))
-                throw new ArgumentException(nameof(id));
-            if (id != car.Id)
-                throw new ArgumentException(nameof(car));
-
-            _context.Entry(car).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CarExists(id))
-                    throw new ArgumentException(nameof(id));
-                throw;
-            }
-            return car;
+            await _carRepository.UpdateAsync(car, id);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var car = await _context.Cars.FindAsync(id);
-            if (car == null)
-                throw new ArgumentException();
-            _context.Cars.Remove(car);
-            await _context.SaveChangesAsync();
+            _carRepository.DeleteAsync(id);
         }
-
-        private bool CarExists(Guid id)
-        {
-            return _context.Cars.Any(e => e.Id == id);
-        }
-
     }
 }
