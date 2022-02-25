@@ -43,6 +43,9 @@ namespace CarRentals.Migrations
                     b.Property<Guid?>("RentalId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
