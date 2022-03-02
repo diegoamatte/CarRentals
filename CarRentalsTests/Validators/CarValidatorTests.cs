@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CarRentals.Models;
+using CarRentals.Validators;
+using System;
 using Xunit;
-using CarRentals.Models;
 
-namespace CarRentalsTests.Models
+namespace CarRentalsTests.Validators
 {
     public class CarValidatorTests
     {

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarRentals.Migrations
 {
     [DbContext(typeof(CarRentalDbContext))]
-    [Migration("20220224161421_CreateRentalModel")]
-    partial class CreateRentalModel
+    [Migration("20220225150729_CreateRental")]
+    partial class CreateRental
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -44,6 +44,9 @@ namespace CarRentals.Migrations
 
                     b.Property<Guid?>("RentalId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()

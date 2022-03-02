@@ -13,7 +13,7 @@ namespace CarRentalsTests
 {
     public class CarControllerTests
     {
-        private readonly Mock<ICarService> _carService;
+        private readonly Mock<IService<Car>> _carService;
         private readonly CarsController _carController;
         private readonly Guid _validId;
         private readonly Car _testCar; 
@@ -30,12 +30,12 @@ namespace CarRentalsTests
             _validId = Guid.NewGuid();
             _testCar = new Car { Id = _validId, Brand = "Brand1", LicensePlate = "AAA-555", Model = "Model1", Type = "SUV" };
 
-            _carService = new Mock<ICarService>();
+            _carService = new Mock<IService<Car>>();
             _carController = new CarsController(_carService.Object);
 
             //Arrange
-            _carService.Setup(cs => cs.GetCars()).Returns(GetCarListAsync());
-            _carService.Setup(cs => cs.GetCarById(_validId)).Returns(
+            _carService.Setup(cs => cs.GetAsync()).Returns(GetCarListAsync());
+            _carService.Setup(cs => cs.GetByIdAsync(_validId)).Returns(
                 Task.FromResult(_testCar));
         }
 
@@ -45,7 +45,7 @@ namespace CarRentalsTests
             //Act
             _ = _carController.GetCars();
             //Assert
-            _carService.Verify(cs => cs.GetCars(), Times.Once);
+            _carService.Verify(cs => cs.GetAsync(), Times.Once);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace CarRentalsTests
         {
             //Arrange
             var guid = Guid.NewGuid();
-            _carService.Setup(cs => cs.UpdateCar(guid, new Car()))
+            _carService.Setup(cs => cs.UpdateAsync(guid, new Car()))
                 .Throws<ArgumentException>();
             //Act
             var result = _carController.PutCar(guid, new Car());
@@ -112,7 +112,7 @@ namespace CarRentalsTests
             _ = _carController.PutCar(_validId, _testCar);
 
             //Assert
-            _carService.Verify(cs => cs.UpdateCar(_validId, _testCar), Times.Once);
+            _carService.Verify(cs => cs.UpdateAsync(_validId, _testCar), Times.Once);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace CarRentalsTests
             _ = _carController.DeleteCar(_validId);
 
             //Assert
-            _carService.Verify(cs => cs.DeleteCar(_validId), Times.Once);
+            _carService.Verify(cs => cs.DeleteAsync(_validId), Times.Once);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace CarRentalsTests
         {
             //Arrange
             var invalidId = Guid.NewGuid();
-            _carService.Setup(cs =>cs.DeleteCar(invalidId)).Throws(new ArgumentException());
+            _carService.Setup(cs =>cs.DeleteAsync(invalidId)).Throws(new ArgumentException());
 
             //Act
             var actionresult = _carController.DeleteCar(invalidId);
@@ -156,7 +156,7 @@ namespace CarRentalsTests
             _ = _carController.PostCar(_testCar);
 
             //Assert
-            _carService.Verify(cs => cs.SaveCar(_testCar), Times.Once);
+            _carService.Verify(cs => cs.SaveAsync(_testCar), Times.Once);
         }
 
         private Task<IEnumerable<Car>> GetCarListAsync()

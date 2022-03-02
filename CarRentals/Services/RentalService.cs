@@ -1,70 +1,50 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.Exceptions;
+using CarRentals.Models;
+using CarRentals.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentals.Services
 {
     public class RentalService : IService<Rental>
     {
-        private readonly CarRentalDbContext _context;
+        private IRepository<Rental> _rentalRepository;
 
-        public RentalService(CarRentalDbContext context)
+        public RentalService(IRepository<Rental> repository)
         {
-            _context = context;
+            _rentalRepository = repository;
         }
         public async Task DeleteAsync(Guid id)
         {
-            var rental = await _context.Rentals.FindAsync(id);
-            if (rental == null)
-                throw new ArgumentException();
-            _context.Rentals.Remove(rental);
-            await _context.SaveChangesAsync();
+            _rentalRepository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<Rental>> GetAsync()
         {
-            return await _context.Rentals.ToListAsync();
+            return await _rentalRepository.GetAsync();
         }
 
         public async Task<Rental> GetByIdAsync(Guid id)
         {
-            if (id == Guid.Empty)
-                throw new ArgumentNullException(nameof(id));
-            return await _context.Rentals.SingleOrDefaultAsync(r => r.Id == id);
+            return await _rentalRepository.GetByIDAsync(id);
         }
 
         public async Task<Rental> SaveAsync(Rental rental)
         {
+
+            foreach(var car in rental.RentedCars)
+            {
+                if (car.State is CarState.Damaged)
+                    throw new InvalidCarStateException("Car is damaged, cannot be rent.");
+            }
             rental.Id = Guid.NewGuid();
-            _context.Rentals.Add(rental);
-            await _context.SaveChangesAsync();
+            await _rentalRepository.SaveAsync(rental);
             return rental;
         }
 
-        public async Task<Rental> UpdateAsync(Guid id, Rental rental)
+        public async Task UpdateAsync(Guid id, Rental rental)
         {
-            if (!RentalExists(id))
-                throw new ArgumentException(nameof(id));
-            if (id != rental.Id)
-                throw new ArgumentException(nameof(rental));
-
-            _context.Entry(rental).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RentalExists(id))
-                    throw new ArgumentException(nameof(id));
-                throw;
-            }
-            return rental;
+            await _rentalRepository.UpdateAsync(rental, id);
         }
-
-        private bool RentalExists(Guid id)
-        {
-            return _context.Rentals.Any(e => e.Id == id);
-        }
+        
     }
 }

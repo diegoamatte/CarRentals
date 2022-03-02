@@ -22,13 +22,24 @@ namespace CarRentals.Controllers
             _clientService = service;
         }
 
+        /// <summary>
+        /// Gets a list of clients.
+        /// </summary>
+        /// <response code="200">Successful operation.</response>
+        [ProducesResponseType(typeof(IEnumerable<Client>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetClient()
         {
             return Ok(await _clientService.GetAsync());
         }
 
-        // GET: api/Clients/5
+        /// <summary>
+        /// Finds a client by its ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <response code="200">Successful operation.</response>
+        /// <response code="404">Client not found.</response>
+        [ProducesResponseType(typeof(Car), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetClient(Guid id)
         {
@@ -38,8 +49,15 @@ namespace CarRentals.Controllers
             return Ok(client);
         }
 
-        // PUT: api/Clients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Updates an existing client.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="client"></param>
+        /// <response code="204">Successful operation.</response>
+        /// <response code="400">Validation error or malformed request.</response>
+        /// <response code="404">Client not found.</response>
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutClient(Guid id, Client client)
         {
@@ -54,8 +72,12 @@ namespace CarRentals.Controllers
             return NoContent();
         }
 
-        // POST: api/Clients
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Adds a new client.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <response code="201">Successfully created client.</response>
+        /// <response code="400">Validation problem.</response>
         [HttpPost]
         public async Task<IActionResult> PostClient(Client client)
         {
@@ -63,7 +85,12 @@ namespace CarRentals.Controllers
             return CreatedAtAction("GetClient", new { client.Id }, client);
         }
 
-        // DELETE: api/Clients/5
+        /// <summary>
+        /// Deletes an existing client.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <response code="204">Successfully deleted client.</response>
+        /// <response code="404">Client not found.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(Guid id)
         {
@@ -71,7 +98,7 @@ namespace CarRentals.Controllers
             {
                 await _clientService.DeleteAsync(id);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException)
             {
                 return NotFound();
             }
