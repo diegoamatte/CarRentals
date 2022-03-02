@@ -50,23 +50,4 @@ public class CustomWebApplicationFactory<TStartup>
             }
         });
     }
-
-    private IEnumerable<Car> GetCars()
-    {
-        return new List<Car>
-        {
-            new Car{ Brand = "FORD", Id = Guid.NewGuid(), LicensePlate = "ABC-123", Model = "Ka", State = CarState.Available, Type = "Sedan"},
-            new Car{ Brand = "VW", Id = Guid.NewGuid(), LicensePlate = "ABC-124", Model = "Gol", State = CarState.Available, Type = "Sedan"},
-            new Car{ Brand = "CHEVROLET", Id = Guid.NewGuid(), LicensePlate = "ABC-143", Model = "Corsa", State = CarState.Damaged, Type = "Sedan"},
-        };
-    }
-
-    private IEnumerable<Client> GetClients()
-    {
-        return new List<Client>
-        {
-            new Client{ Id = Guid.NewGuid(), Name = "John", Address = "Fake Street 123", DNI = 12345789, Surname = "Doe"},
-            new Client{ Id = Guid.NewGuid(), Name = "Jane", Address = "Fake Street 125", DNI = 90234569, Surname = "Doe Doe"},
-        };
-    }
 }
