@@ -58,7 +58,7 @@ namespace CarRentals.Controllers
         /// Updates an existing rental.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="client"></param>
+        /// <param name="rental"></param>
         /// <response code="204">Successful operation.</response>
         /// <response code="400">Validation error or malformed request.</response>
         /// <response code="404">Rental not found.</response>
