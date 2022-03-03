@@ -13,7 +13,7 @@ namespace CarRentalsTests.Controllers
 {
     public class ClientsControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly HttpClient _client;
+        private readonly HttpClient _httpClient;
         private readonly string _baseUrl = "api/clients";
         private Client _validClient;
         public static IEnumerable<object[]> InvalidClients =>
@@ -27,7 +27,7 @@ namespace CarRentalsTests.Controllers
             };
         public ClientsControllerTests(CustomWebApplicationFactory<Program> factory)
         {
-            _client = factory.CreateClient();
+            _httpClient = factory.CreateClient();
             _validClient = new Client
             {
                 Name = "John",
@@ -44,7 +44,7 @@ namespace CarRentalsTests.Controllers
             var expected = new List<Client>();
 
             //Act
-            var result = await _client.GetFromJsonAsync<List<Client>>(_baseUrl); 
+            var result = await _httpClient.GetFromJsonAsync<List<Client>>(_baseUrl); 
 
             //Assert
             Assert.Equal(expected.Count, result.Count);
@@ -65,7 +65,7 @@ namespace CarRentalsTests.Controllers
         public async void PostClients_ReturnsBadRequest_WhenClientIsInvalid(Client client)
         {
             //Act
-            var result = await _client.PostAsJsonAsync(_baseUrl, client);
+            var result = await _httpClient.PostAsJsonAsync(_baseUrl, client);
             
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
@@ -75,7 +75,7 @@ namespace CarRentalsTests.Controllers
         public async void PutClient_ReturnsNotFound_WhenClientNotExists()
         {
             //Act
-            var result = await _client.GetAsync($"{ _baseUrl }/{Guid.NewGuid()}");
+            var result = await _httpClient.GetAsync($"{ _baseUrl }/{Guid.NewGuid()}");
 
             //Assert
             Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
@@ -91,7 +91,7 @@ namespace CarRentalsTests.Controllers
             var url = $"{_baseUrl}/{clientSaved.Id}";
 
             //Act
-            var result = await _client.PutAsJsonAsync<Client>(url, client);
+            var result = await _httpClient.PutAsJsonAsync<Client>(url, client);
             
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
@@ -110,8 +110,8 @@ namespace CarRentalsTests.Controllers
             var url = $"{_baseUrl}/{clientSaved.Id}";
 
             //Act
-            var result = await _client.PutAsJsonAsync<Client>(url, _validClient);
-            var updatedClient = await _client.GetFromJsonAsync<Client>(url);
+            var result = await _httpClient.PutAsJsonAsync<Client>(url, _validClient);
+            var updatedClient = await _httpClient.GetFromJsonAsync<Client>(url);
 
             //Assert
             Assert.Equal(_validClient, updatedClient);
@@ -125,7 +125,7 @@ namespace CarRentalsTests.Controllers
             var url = $"{_baseUrl}/{clientSaved.Id}";
 
             //Act
-            var result = await _client.PutAsJsonAsync<Client>(url, _validClient);
+            var result = await _httpClient.PutAsJsonAsync<Client>(url, _validClient);
             
             //Assert
             Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
@@ -139,7 +139,7 @@ namespace CarRentalsTests.Controllers
             var url = $"{_baseUrl}/{clientSaved.Id}";
 
             //Act
-            var result = await _client.DeleteAsync(url);
+            var result = await _httpClient.DeleteAsync(url);
 
             //Assert
             Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
@@ -153,8 +153,8 @@ namespace CarRentalsTests.Controllers
             var url = $"{_baseUrl}/{clientSaved.Id}";
 
             //Act
-            _ = await _client.DeleteAsync(url);
-            var result = await _client.GetAsync(url);
+            _ = await _httpClient.DeleteAsync(url);
+            var result = await _httpClient.GetAsync(url);
 
             //Assert
             Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
@@ -162,9 +162,9 @@ namespace CarRentalsTests.Controllers
 
         private async Task<Client> SaveClientAsync(Client client)
         {
-            var result = await _client.PostAsJsonAsync(_baseUrl, client);
+            var result = await _httpClient.PostAsJsonAsync(_baseUrl, client);
             result.Headers.TryGetValues("location", out var location);
-            var clientSaved = await _client.GetFromJsonAsync<Client>(location.First());
+            var clientSaved = await _httpClient.GetFromJsonAsync<Client>(location.First());
             return clientSaved;
         }
     }
