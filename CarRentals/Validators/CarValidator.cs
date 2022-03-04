@@ -16,8 +16,6 @@ namespace CarRentals.Validators
             RuleFor(x => x.LicensePlate)
                 .NotEmpty()
                 .Matches(_licenseRegexPattern);
-            RuleFor(x => x.Id)
-                .NotEmpty();
             RuleFor(x => x.Type)
                 .NotEmpty();
         }

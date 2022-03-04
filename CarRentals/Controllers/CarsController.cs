@@ -2,6 +2,9 @@
 using CarRentals.Models;
 using CarRentals.Services;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using CarRentals.Queries;
+using CarRentals.Commands;
 
 namespace CarRentals.Controllers
 {
@@ -10,11 +13,11 @@ namespace CarRentals.Controllers
     public class CarsController : ControllerBase
     {
 
-        private readonly IService<Car> _carService;
+        private readonly ISender _sender;
 
-        public CarsController(IService<Car> carService)
+        public CarsController(ISender sender)
         {
-            _carService = carService;
+            _sender = sender;
         }
 
         /// <summary>
@@ -25,7 +28,8 @@ namespace CarRentals.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
-            return Ok(await _carService.GetAsync());
+            var cars = await _sender.Send(new GetCars.Query());
+            return Ok(cars);
         }
 
         /// <summary>
@@ -36,29 +40,31 @@ namespace CarRentals.Controllers
         /// <response code="404">Car not found.</response>
         [ProducesResponseType(typeof(Car), StatusCodes.Status200OK)]
         [HttpGet("{id}")]
-        public async Task<ActionResult<Car>> GetCar(Guid id)
+        public async Task<ActionResult<Car>> GetCar([FromRoute] Guid id)
         {
-            var car = await _carService.GetByIdAsync(id);
-            if(car == null)
+            var response = await _sender.Send(new GetCarsById.Query(id));
+            if(response.Car == null)
                 return NotFound();
-            return Ok(car);
+            return Ok(response.Car);
         }
 
         /// <summary>
         /// Updates an existing car.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="car"></param>
+        /// <param name="command"></param>
         /// <response code="204">Successful operation.</response>
         /// <response code="400">Validation error or malformed request.</response>
         /// <response code="404">Car not found.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCar(Guid id, Car car)
+        public async Task<IActionResult> PutCar([FromRoute] Guid id,[FromBody] Car car)
         {
+            if(id != car.Id)
+                return BadRequest();
             try
             {
-                var updatedCar = _carService.UpdateAsync(id, car);
+                await _sender.Send(new UpdateCar.UpdateCarCommand(id,car));
             }
             catch (Exception ex)
             {
@@ -72,14 +78,15 @@ namespace CarRentals.Controllers
         /// <summary>
         /// Adds a new car.
         /// </summary>
-        /// <param name="car"></param>
+        /// <param name="command"></param>
         /// <response code="201">Successfully created car.</response>
         /// <response code="400">Validation problem.</response>
         [ProducesResponseType(typeof(Car), StatusCodes.Status201Created)]
         [HttpPost]
         public async Task<ActionResult<Car>> PostCar(Car car)
         {
-            await _carService.SaveAsync(car);
+            var command = new AddCar.AddCarCommand(car);
+            var savedCar  = await _sender.Send(command);
             return CreatedAtAction("GetCar", new { car.Id }, car);
         }
 
@@ -90,11 +97,11 @@ namespace CarRentals.Controllers
         /// <response code="204">Successfully deleted car.</response>
         /// <response code="404">Car not found.</response>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCar(Guid id)
+        public async Task<IActionResult> DeleteCar(DeleteCar.DeleteCarCommand command)
         {
             try
             {
-                await _carService.DeleteAsync(id);
+                await _sender.Send(command);
             }
             catch (ArgumentException)
             {
