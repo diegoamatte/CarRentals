@@ -57,6 +57,8 @@ builder.Services.AddScoped<IRepository<Rental>, RentalRepository>();
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 
 var app = builder.Build();
 
