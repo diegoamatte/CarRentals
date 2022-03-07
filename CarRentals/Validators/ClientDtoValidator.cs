@@ -1,14 +1,14 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
 using FluentValidation;
 
 namespace CarRentals.Validators
 {
-    public class ClientValidator : AbstractValidator<Client>
+    public class ClientDtoValidator : AbstractValidator<ClientDto>
     {
         private int _minDniValue = 1000000;
         private int _maxDniValue = 99999999;
 
-        public ClientValidator()
+        public ClientDtoValidator()
         {
             RuleFor(client => client.Name).NotEmpty();
             RuleFor(client => client.Address).NotEmpty();
