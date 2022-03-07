@@ -4,22 +4,20 @@ using MediatR;
 
 namespace CarRentals.Commands
 {
-    public static class DeleteCar
+    public static class DeleteClient
     {
         public record Command(Guid Id) : IRequest;
-
         public class Handler : IRequestHandler<Command, Unit>
         {
-            private IService<Car> _carService;
-
-            public Handler(IService<Car> carService)
+            private IService<Client> _clientService;
+            public Handler(IService<Client> clientService)
             {
-                _carService = carService;
+                _clientService = clientService;
             }
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                await _carService.DeleteAsync(request.Id);
+                await _clientService.DeleteAsync(request.Id);
                 return Unit.Value;
             }
         }

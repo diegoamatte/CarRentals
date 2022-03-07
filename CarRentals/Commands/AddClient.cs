@@ -6,25 +6,25 @@ using MediatR;
 
 namespace CarRentals.Commands
 {
-    public static class AddCar
+    public static class AddClient
     {
-        public record Command(CarDto Car) : IRequest<Guid>;
+        public record Command(ClientDto Client) : IRequest<Guid>;
 
         public class Handler : IRequestHandler<Command, Guid>
         {
-            private IService<Car> _carService;
+            private IService<Client> _clientService;
             private IMapper _mapper;
 
-            public Handler(IService<Car> carService, IMapper mapper)
+            public Handler(IService<Client> clientService, IMapper mapper)
             {
-                _carService = carService;
+                _clientService = clientService;
                 _mapper = mapper;
             }
 
             public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
             {
-                var car =  await _carService.SaveAsync(_mapper.Map<Car>(request.Car));
-                return car.Id;
+                var client = await _clientService.SaveAsync(_mapper.Map<Client>(request.Client));
+                return client.Id;
             }
         }
     }

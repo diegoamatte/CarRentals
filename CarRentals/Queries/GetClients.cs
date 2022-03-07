@@ -6,26 +6,26 @@ using MediatR;
 
 namespace CarRentals.Queries
 {
-    public static class GetCarsById
+    public static class GetClients
     {
-        public record Query(Guid Id) : IRequest<Response>;
+        public record Query() : IRequest<Response>;
 
-        public record Response(CarDto Car);
+        public record Response(IEnumerable<ClientDto> Clients);
+
         public class Handler : IRequestHandler<Query, Response>
         {
-            private IService<Car> _carService;
+            private IService<Client> _clientService;
             private IMapper _mapper;
 
-            public Handler(IService<Car> carService, IMapper mapper)
+            public Handler(IService<Client> clientService, IMapper mapper)
             {
-                _carService = carService;
+                _clientService = clientService;
                 _mapper = mapper;
             }
 
             public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
             {
-
-                return new Response(_mapper.Map<CarDto>(await _carService.GetByIdAsync(request.Id)));
+                return new Response(_mapper.Map<IEnumerable<ClientDto>>(await _clientService.GetAsync()));
             }
         }
     }
