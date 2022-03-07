@@ -1,13 +1,11 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using CarRentals.Commands;
+using CarRentals.DTOs;
 using CarRentals.Models;
+using CarRentals.Queries;
 using CarRentals.Services;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CarRentals.Controllers
 {
@@ -15,22 +13,23 @@ namespace CarRentals.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly IService<Client> _clientService;
+        private readonly ISender _sender;
 
-        public ClientsController(IService<Client> service)
+        public ClientsController(ISender sender)
         {
-            _clientService = service;
+            _sender = sender;
         }
 
         /// <summary>
         /// Gets a list of clients.
         /// </summary>
         /// <response code="200">Successful operation.</response>
-        [ProducesResponseType(typeof(IEnumerable<Client>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<ClientDto>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetClient()
         {
-            return Ok(await _clientService.GetAsync());
+            var response = await _sender.Send(new GetClients.Query());
+            return Ok(response.Clients);
         }
 
         /// <summary>
@@ -43,10 +42,10 @@ namespace CarRentals.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetClient(Guid id)
         {
-            var client = await _clientService.GetByIdAsync(id);
-            if (client == null)
+            var response = await _sender.Send(new GetClientsById.Query(id));
+            if (response.Client == null)
                 return NotFound();
-            return Ok(client);
+            return Ok(response.Client);
         }
 
         /// <summary>
@@ -59,11 +58,11 @@ namespace CarRentals.Controllers
         /// <response code="404">Client not found.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(Guid id, Client client)
+        public async Task<IActionResult> PutClient(Guid id, ClientDto client)
         {
             try
             {
-                var updatedClient = _clientService.UpdateAsync(id, client);
+                _ = _sender.Send(new UpdateClient.Command(id, client));
             }
             catch (Exception ex)
             {
@@ -79,10 +78,10 @@ namespace CarRentals.Controllers
         /// <response code="201">Successfully created client.</response>
         /// <response code="400">Validation problem.</response>
         [HttpPost]
-        public async Task<IActionResult> PostClient(Client client)
+        public async Task<IActionResult> PostClient(ClientDto client)
         {
-            await _clientService.SaveAsync(client);
-            return CreatedAtAction("GetClient", new { client.Id }, client);
+            var id = await _sender.Send(new AddClient.Command(client));
+            return CreatedAtAction("GetClient", new { id }, client);
         }
 
         /// <summary>
@@ -96,7 +95,7 @@ namespace CarRentals.Controllers
         {
             try
             {
-                await _clientService.DeleteAsync(id);
+                _ = await _sender.Send(new DeleteClient.Command(id));
             }
             catch (ArgumentException)
             {

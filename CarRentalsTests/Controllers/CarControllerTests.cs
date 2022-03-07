@@ -1,178 +1,176 @@
-﻿using CarRentals.Controllers;
+﻿using CarRentals.DTOs;
 using CarRentals.Models;
-using CarRentals.Services;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace CarRentalsTests
+namespace CarRentalsTests.Controllers
 {
-    public class CarControllerTests
+    public class CarControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly Mock<IService<Car>> _carService;
-        private readonly CarsController _carController;
-        private readonly Guid _validId;
-        private readonly Car _testCar; 
-
-        public static IEnumerable<object[]> InvalidId =>
+        private readonly HttpClient _httpClient;
+        private string _baseUrl = "api/cars";
+        private CarDto _validCar;
+        public static IEnumerable<object[]> InvalidCars =>
             new List<object[]>
             {
-                new object[]{ Guid.NewGuid() },
-                new object[]{ Guid.Empty },
+                new object[] { new CarDto{ Brand = "", LicensePlate = "", Model = "", State = CarState.Available, Type = ""} },
+                new object[] { new CarDto{ Brand = "Renault", LicensePlate = "AAA-555", Model = "", State = CarState.Available, Type = "" } },
+                new object[] { new CarDto{ Brand = "Renault", LicensePlate = "AAA-555", Model = "Sandero", State = CarState.Available, Type = "" } },
             };
 
-        public CarControllerTests()
+        public CarControllerTests(CustomWebApplicationFactory<Program> factory)
         {
-            _validId = Guid.NewGuid();
-            _testCar = new Car { Id = _validId, Brand = "Brand1", LicensePlate = "AAA-555", Model = "Model1", Type = "SUV" };
-
-            _carService = new Mock<IService<Car>>();
-            _carController = new CarsController(_carService.Object);
-
-            //Arrange
-            _carService.Setup(cs => cs.GetAsync()).Returns(GetCarListAsync());
-            _carService.Setup(cs => cs.GetByIdAsync(_validId)).Returns(
-                Task.FromResult(_testCar));
+            _httpClient = factory.CreateClient();
+            _validCar = new CarDto
+            {
+                Brand = "Volkswagen",
+                LicensePlate = "AAA-555",
+                Model = "Bora",
+                State = CarState.Available,
+                Type = "Sedan"
+            };
         }
 
         [Fact]
-        public void GetCars_CallsMethodGetFromService()
+        public async void GetCars_ReturnsOk()
         {
             //Act
-            _ = _carController.GetCars();
+            var result = await _httpClient.GetAsync(_baseUrl);
+
             //Assert
-            _carService.Verify(cs => cs.GetAsync(), Times.Once);
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         }
 
         [Fact]
-        public async void GetCars_RetrievesCarLists()
+        public async void PostCar_ReturnsCreated_WhenCarIsValid()
         {
             //Act
-            var actionResult = await _carController.GetCars();
-            var result = (OkObjectResult)actionResult.Result;
-            var cars = (IEnumerable<Car>)result.Value;
-            var carList = GetCarList();
+            var result = await _httpClient.PostAsJsonAsync<CarDto>(_baseUrl, _validCar);
             //Assert
-            Assert.True(cars.SequenceEqual(carList));
+            Assert.Equal(HttpStatusCode.Created, result.StatusCode);
+        }
+
+        [Fact]
+        public async void PostCar_CreatesCar_WhenCarIsValid()
+        {
+            //Act
+            var result = await SaveCarAsync(_validCar);
+
+            //Assert
+            Assert.Equal(_validCar, result);
         }
 
         [Theory]
-        [MemberData(nameof(InvalidId))]
-        public async void GetCar_ReturnNotFoundStatus_WhenIdIsNotValid(Guid id)
+        [MemberData(nameof(InvalidCars))]
+        public async void PostCar_ReturnsBadRequest_WhenCarIsInvalid(CarDto car)
         {
             //Act
-            var result = await _carController.GetCar(id);
+            var result = await _httpClient.PostAsJsonAsync<CarDto>(_baseUrl, car);
+
             //Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }
 
         [Fact]
-        public async void GetCar_ReturnsOkStatus_WhenIdIsValid()
+        public async void PutCar_ReturnsNotFound_WhenCarNotExists()
         {
             //Act
-            var result = await _carController.GetCar(_validId);
-            //Assert
-            Assert.IsType<OkObjectResult>(result.Result);
-        }
-        
-        [Fact]
-        public async void GetCar_ReturnsCarWithSameId_WhenIdIsValid()
-        {
-            //Act
-            var actionResult =  await _carController.GetCar(_validId);
-            var objectResult = actionResult.Result as OkObjectResult;
-            var car = objectResult.Value as Car;
+            var result = await _httpClient.GetAsync($"{ _baseUrl }/{Guid.NewGuid()}");
 
             //Assert
-            Assert.Equal(_testCar, car);
+            Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
         }
 
-        [Fact]
-        public void PutCar_ReturnsBadRequest_WhenArgumentExceptionIsCatched()
+        [Theory]
+        [MemberData(nameof(InvalidCars))]
+        public async void PutCar_ReturnsBadRequest_WhenCarIsInvalid(CarDto car)
         {
             //Arrange
-            var guid = Guid.NewGuid();
-            _carService.Setup(cs => cs.UpdateAsync(guid, new Car()))
-                .Throws<ArgumentException>();
+            var savedCar = await SaveCarAsync(_validCar);
+            car.Id = savedCar.Id;
+            var url = $"{_baseUrl}/{savedCar.Id}";
+
             //Act
-            var result = _carController.PutCar(guid, new Car());
+            var result = await _httpClient.PutAsJsonAsync<CarDto>(url, car);
 
             //Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
+            Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }
 
         [Fact]
-        public void PutCar_CallsCarUpdate()
-        {
-            //Act
-            _ = _carController.PutCar(_validId, _testCar);
-
-            //Assert
-            _carService.Verify(cs => cs.UpdateAsync(_validId, _testCar), Times.Once);
-        }
-
-        [Fact]
-        public void PutCar_ReturnsNoContent_WhenSuccess()
-        {
-            //Act
-            var result = _carController.PutCar(_validId, _testCar);
-
-            //Assert
-            Assert.IsType<NoContentResult>(result.Result);
-        }
-
-        [Fact]
-        public void DeleteCar_CallsServiceDeleteOnce()
-        {
-            //Act
-            _ = _carController.DeleteCar(_validId);
-
-            //Assert
-            _carService.Verify(cs => cs.DeleteAsync(_validId), Times.Once);
-        }
-
-        [Fact]
-        public void DeleteCar_ReturnsNotFound_WhenArgumentExceptionIsCatched()
+        public async void PutCar_ModifiesCar_WhenIsValid()
         {
             //Arrange
-            var invalidId = Guid.NewGuid();
-            _carService.Setup(cs =>cs.DeleteAsync(invalidId)).Throws(new ArgumentException());
+            var savedCar = await SaveCarAsync(_validCar);
+            _validCar.Id = savedCar.Id;
+            savedCar.Brand = "OtherBrand";
+            savedCar.LicensePlate = "AA-767-AB";
+            savedCar.State = CarState.Damaged;
+            var url = $"{_baseUrl}/{savedCar.Id}";
 
             //Act
-            var actionresult = _carController.DeleteCar(invalidId);
+            await _httpClient.PutAsJsonAsync<CarDto>(url, savedCar);
+            var updatedCar = await _httpClient.GetFromJsonAsync<CarDto>(url);
 
             //Assert
-            Assert.IsType<NotFoundResult>(actionresult.Result);
+            Assert.Equal(savedCar, updatedCar);
         }
 
         [Fact]
-        public void PostCar_CallsSaveCar()
+        public async void PutCar_ReturnsNoContent_WhenCarIsValid()
         {
+            //Arrange
+            var savedCar = await SaveCarAsync(_validCar);
+            var url = $"{_baseUrl}/{savedCar.Id}";
+
             //Act
-            _ = _carController.PostCar(_testCar);
+            var result = await _httpClient.PutAsJsonAsync<CarDto>(url, savedCar);
 
             //Assert
-            _carService.Verify(cs => cs.SaveAsync(_testCar), Times.Once);
+            Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
         }
 
-        private Task<IEnumerable<Car>> GetCarListAsync()
+        [Fact]
+        public async void DeleteCar_ReturnsNoContent_WhenCarIsValid()
         {
-            return Task.FromResult(GetCarList());
+            //Arrange
+            var savedCar = await SaveCarAsync(_validCar);
+            var url = $"{_baseUrl}/{savedCar.Id}";
+
+            //Act
+            var result = await _httpClient.DeleteAsync(url);
+
+            //Assert
+            Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
         }
 
-        private IEnumerable<Car> GetCarList()
+        [Fact]
+        public async void DeleteCar_ReturnsNotFound_WhenCarIsDeletedOrNotExists()
         {
-            return new List<Car>
-            {
-                _testCar,
-                new Car { Id = Guid.NewGuid(), Brand = "Brand2", LicensePlate = "BBB-666", Model = "Model2", Type = "SEDAN"},
-                new Car { Id = Guid.NewGuid(), Brand = "Brand3", LicensePlate = "CCC-777", Model = "Model3", Type = "MINIVAN"},
-                new Car { Id = Guid.NewGuid(), Brand = "Brand4", LicensePlate = "DDD-888", Model = "Model4", Type = "COUPE"},
-            };
+            //Arrange
+            var savedCar = await SaveCarAsync(_validCar);
+            var url = $"{_baseUrl}/{savedCar.Id}";
+
+            //Act
+            _ = await _httpClient.DeleteAsync(url);
+            var result = await _httpClient.GetAsync(url);
+
+            //Assert
+            Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
+        }
+
+        private async Task<CarDto> SaveCarAsync(CarDto car)
+        {
+            var result = await _httpClient.PostAsJsonAsync<CarDto>(_baseUrl, car);
+            result.Headers.TryGetValues("location", out var location);
+            var getLocation = location.First();
+            return await _httpClient.GetFromJsonAsync<CarDto>(getLocation);
         }
     }
 }
