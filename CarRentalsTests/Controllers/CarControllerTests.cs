@@ -1,7 +1,7 @@
 ﻿using CarRentals.DTOs;
 using CarRentals.Models;
+using CarRentalsTests.Data;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,26 +15,10 @@ namespace CarRentalsTests.Controllers
     {
         private readonly HttpClient _httpClient;
         private string _baseUrl = "api/cars";
-        private CarDto _validCar;
-        public static IEnumerable<object[]> InvalidCars =>
-            new List<object[]>
-            {
-                new object[] { new CarDto{ Brand = "", LicensePlate = "", Model = "", State = CarState.Available, Type = ""} },
-                new object[] { new CarDto{ Brand = "Renault", LicensePlate = "AAA-555", Model = "", State = CarState.Available, Type = "" } },
-                new object[] { new CarDto{ Brand = "Renault", LicensePlate = "AAA-555", Model = "Sandero", State = CarState.Available, Type = "" } },
-            };
 
         public CarControllerTests(CustomWebApplicationFactory<Program> factory)
         {
             _httpClient = factory.CreateClient();
-            _validCar = new CarDto
-            {
-                Brand = "Volkswagen",
-                LicensePlate = "AAA-555",
-                Model = "Bora",
-                State = CarState.Available,
-                Type = "Sedan"
-            };
         }
 
         [Fact]
@@ -47,27 +31,29 @@ namespace CarRentalsTests.Controllers
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         }
 
-        [Fact]
-        public async void PostCar_ReturnsCreated_WhenCarIsValid()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void PostCar_ReturnsCreated_WhenCarIsValid(CarDto validCar)
         {
             //Act
-            var result = await _httpClient.PostAsJsonAsync<CarDto>(_baseUrl, _validCar);
+            var result = await _httpClient.PostAsJsonAsync<CarDto>(_baseUrl, validCar);
             //Assert
             Assert.Equal(HttpStatusCode.Created, result.StatusCode);
         }
 
-        [Fact]
-        public async void PostCar_CreatesCar_WhenCarIsValid()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void PostCar_CreatesCar_WhenCarIsValid(CarDto validCar)
         {
             //Act
-            var result = await SaveCarAsync(_validCar);
+            var result = await SaveCarAsync(validCar);
 
             //Assert
-            Assert.Equal(_validCar, result);
+            Assert.Equal(validCar, result);
         }
 
         [Theory]
-        [MemberData(nameof(InvalidCars))]
+        [ClassData(typeof(InvalidCarData))]
         public async void PostCar_ReturnsBadRequest_WhenCarIsInvalid(CarDto car)
         {
             //Act
@@ -88,27 +74,28 @@ namespace CarRentalsTests.Controllers
         }
 
         [Theory]
-        [MemberData(nameof(InvalidCars))]
-        public async void PutCar_ReturnsBadRequest_WhenCarIsInvalid(CarDto car)
+        [ClassData(typeof(ValidCarData))]
+        public async void PutCar_ReturnsBadRequest_WhenCarIsInvalid(CarDto validCar)
         {
             //Arrange
-            var savedCar = await SaveCarAsync(_validCar);
-            car.Id = savedCar.Id;
+            var savedCar = await SaveCarAsync(validCar);
             var url = $"{_baseUrl}/{savedCar.Id}";
+            savedCar.Brand = "";
 
             //Act
-            var result = await _httpClient.PutAsJsonAsync<CarDto>(url, car);
+            var result = await _httpClient.PutAsJsonAsync<CarDto>(url, savedCar);
 
             //Assert
             Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
         }
 
-        [Fact]
-        public async void PutCar_ModifiesCar_WhenIsValid()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void PutCar_ModifiesCar_WhenIsValid(CarDto validCar)
         {
             //Arrange
-            var savedCar = await SaveCarAsync(_validCar);
-            _validCar.Id = savedCar.Id;
+            var savedCar = await SaveCarAsync(validCar);
+            validCar.Id = savedCar.Id;
             savedCar.Brand = "OtherBrand";
             savedCar.LicensePlate = "AA-767-AB";
             savedCar.State = CarState.Damaged;
@@ -122,11 +109,12 @@ namespace CarRentalsTests.Controllers
             Assert.Equal(savedCar, updatedCar);
         }
 
-        [Fact]
-        public async void PutCar_ReturnsNoContent_WhenCarIsValid()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void PutCar_ReturnsNoContent_WhenCarIsValid(CarDto validCar)
         {
             //Arrange
-            var savedCar = await SaveCarAsync(_validCar);
+            var savedCar = await SaveCarAsync(validCar);
             var url = $"{_baseUrl}/{savedCar.Id}";
 
             //Act
@@ -136,11 +124,12 @@ namespace CarRentalsTests.Controllers
             Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
         }
 
-        [Fact]
-        public async void DeleteCar_ReturnsNoContent_WhenCarIsValid()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void DeleteCar_ReturnsNoContent_WhenCarIsValid(CarDto validCar)
         {
             //Arrange
-            var savedCar = await SaveCarAsync(_validCar);
+            var savedCar = await SaveCarAsync(validCar);
             var url = $"{_baseUrl}/{savedCar.Id}";
 
             //Act
@@ -150,11 +139,12 @@ namespace CarRentalsTests.Controllers
             Assert.Equal(HttpStatusCode.NoContent, result.StatusCode);
         }
 
-        [Fact]
-        public async void DeleteCar_ReturnsNotFound_WhenCarIsDeletedOrNotExists()
+        [Theory]
+        [ClassData(typeof(ValidCarData))]
+        public async void DeleteCar_ReturnsNotFound_WhenCarIsDeletedOrNotExists(CarDto validCar)
         {
             //Arrange
-            var savedCar = await SaveCarAsync(_validCar);
+            var savedCar = await SaveCarAsync(validCar);
             var url = $"{_baseUrl}/{savedCar.Id}";
 
             //Act
