@@ -12,6 +12,8 @@ namespace CarRentals.Profiles
             CreateMap<CarDto, Car>();
             CreateMap<ClientDto, Client>();
             CreateMap<Client, ClientDto>();
+            CreateMap<Rental, RentalDto>();
+            CreateMap<RentalDto, Rental>();
         }
     }
 }

@@ -40,16 +40,13 @@ namespace CarRentalsTests.Controllers
         }
 
         [Fact]
-        public async void GetClients_ReturnsEmpty_WhenNoData()
+        public async void GetClients_ReturnsOK()
         {
-            //Arrange
-            var expected = new List<Client>();
-
             //Act
-            var result = await _httpClient.GetFromJsonAsync<List<ClientDto>>(_baseUrl); 
+            var result = await _httpClient.GetAsync(_baseUrl); 
 
             //Assert
-            Assert.Equal(expected.Count, result.Count);
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         }
 
         [Fact]

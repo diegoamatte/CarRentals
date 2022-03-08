@@ -1,6 +1,11 @@
 ﻿using CarRentals.Models;
 using CarRentals.Services;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using CarRentals.Commands;
+using CarRentals.DTOs;
+using CarRentals.Queries;
+using CarRentals.Exceptions;
 
 namespace CarRentals.Controllers
 {
@@ -8,22 +13,23 @@ namespace CarRentals.Controllers
     [ApiController]
     public class RentalController : ControllerBase
     {
-        private readonly IService<Rental> _rentalService;
+        private readonly IMediator _mediator;
 
-        public RentalController(IService<Rental> rentalService)
+        public RentalController(IMediator mediator)
         {
-            _rentalService = rentalService;
+            _mediator = mediator;
         }
 
         /// <summary>
         /// Gets a list of rentals.
         /// </summary>
         /// <response code="200">Successful operation.</response>
-        [ProducesResponseType(typeof(IEnumerable<Rental>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<RentalDto>), StatusCodes.Status200OK)]
         [HttpGet]
         public async Task<IActionResult> GetRentalsAsync()
         {
-            return Ok(await _rentalService.GetAsync());
+            var response = await _mediator.Send(new GetRentals.Query());
+            return Ok(response.Rentals);
         }
 
         /// <summary>
@@ -33,10 +39,12 @@ namespace CarRentals.Controllers
         /// <response code="201">Successfully created rental.</response>
         /// <response code="400">Validation problem.</response>
         [HttpPost]
-        public async Task<IActionResult> PostRentalAsync(Rental rental)
+        public async Task<IActionResult> PostRentalAsync(RentalDto rental)
         {
-            await _rentalService.SaveAsync(rental);
-            return CreatedAtAction("GetRentalById", new { Id = rental.Id }, rental);
+            var id = await _mediator.Send(new AddRental.Command(rental));
+            var notification = new SendMessageNotification.SendMessage(rental);
+            await _mediator.Publish(notification);
+            return CreatedAtAction("GetRentalById", new { Id = id }, rental);
         }
 
         /// <summary>
@@ -48,7 +56,8 @@ namespace CarRentals.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRentalByIdAsync(Guid id)
         {
-            var rental = await _rentalService.GetByIdAsync(id);
+            var response = await _mediator.Send(new GetRentalById.Query(id));
+            var rental = response.Rental;
             if (rental == null)
                 return NotFound();
             return Ok(rental);
@@ -64,11 +73,11 @@ namespace CarRentals.Controllers
         /// <response code="404">Rental not found.</response>
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [HttpPut]
-        public async Task<IActionResult> PutRentalAsync(Guid id, Rental rental)
+        public async Task<IActionResult> PutRentalAsync(Guid id, RentalDto rental)
         {
             try
             {
-                _ = _rentalService.UpdateAsync(id, rental);
+                _ = await _mediator.Send(new UpdateRental.Command(id, rental));
             }
             catch (Exception ex)
             {
@@ -88,7 +97,7 @@ namespace CarRentals.Controllers
         {
             try
             {
-                await _rentalService.DeleteAsync(id);
+                _ = await _mediator.Send(new DeleteRental.Command(id));
             }
             catch (ArgumentException ex)
             {

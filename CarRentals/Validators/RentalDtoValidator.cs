@@ -1,13 +1,14 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
+using CarRentals.Models;
 using FluentValidation;
 
 namespace CarRentals.Validators
 {
-    public class RentalValidator : AbstractValidator<Rental>
+    public class RentalDtoValidator : AbstractValidator<RentalDto>
     {
-        public RentalValidator()
+        public RentalDtoValidator()
         {
-            RuleForEach<Car>(rental => rental.RentedCars)
+            RuleForEach<CarDto>(rental => rental.RentedCars)
                 .Must(car => car.State != CarState.Damaged)
                 .WithMessage("Car is damaged.");
 

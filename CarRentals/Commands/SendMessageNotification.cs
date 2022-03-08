@@ -1,4 +1,5 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
+using CarRentals.Models;
 using CarRentals.Services;
 using MediatR;
 
@@ -6,7 +7,7 @@ namespace CarRentals.Commands
 {
     public static class SendMessageNotification
     {
-        public record SendMessage(Rental Rental): INotification;
+        public record SendMessage(RentalDto Rental): INotification;
 
         public class SendMailNotification : INotificationHandler<SendMessage>
         {

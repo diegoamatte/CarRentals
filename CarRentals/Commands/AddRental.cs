@@ -1,4 +1,6 @@
-﻿using CarRentals.Models;
+﻿using AutoMapper;
+using CarRentals.DTOs;
+using CarRentals.Models;
 using CarRentals.Services;
 using MediatR;
 
@@ -6,20 +8,31 @@ namespace CarRentals.Commands
 {
     public static class AddRental
     {
-        public record AddRequestCommand(Rental Rental) : IRequest<Rental>;
+        public record Command(RentalDto Rental) : IRequest<Guid>;
 
-        public class Handler : IRequestHandler<AddRequestCommand, Rental>
+        public class Handler : IRequestHandler<Command, Guid>
         {
             private IService<Rental> _rentalService;
+            private IMapper _mapper;
 
-            public Handler(IService<Rental> rentalService)
+            public Handler(IService<Rental> rentalService, IMapper mapper)
             {
                 _rentalService = rentalService;
+                _mapper = mapper;
             }
 
-            public async Task<Rental> Handle(AddRequestCommand request, CancellationToken cancellationToken)
+            public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
             {
-                return await _rentalService.SaveAsync(request.Rental);
+                try
+                {
+                    var rental =  await _rentalService.SaveAsync(_mapper.Map<Rental>(request.Rental));
+                    return rental.Id;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
             }
         }
     }
