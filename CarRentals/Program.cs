@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using CarRentals.Repositories;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,10 +48,17 @@ builder.Services.AddDbContext<CarRentalDbContext>(options =>
 builder.Services.AddScoped<IService<Car>, CarService>();
 builder.Services.AddScoped<IService<Client>, ClientService>();
 builder.Services.AddScoped<IService<Rental>, RentalService>();
+builder.Services.AddScoped<INotificationService<Mail>, MailService>();
+builder.Services.AddScoped<INotificationService<PrivateMessage>, TelegramService>();
 
 builder.Services.AddScoped<IRepository<Car>, CarRepository>();
 builder.Services.AddScoped<IRepository<Client>, ClientRepository>();
 builder.Services.AddScoped<IRepository<Rental>, RentalRepository>();
+
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 
 var app = builder.Build();
 

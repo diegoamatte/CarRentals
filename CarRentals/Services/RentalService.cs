@@ -15,7 +15,7 @@ namespace CarRentals.Services
         }
         public async Task DeleteAsync(Guid id)
         {
-            _rentalRepository.DeleteAsync(id);
+            await _rentalRepository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<Rental>> GetAsync()

@@ -1,4 +1,5 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
+using CarRentals.Models;
 using CarRentals.Validators;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace CarRentalsTests.Validators
         public void Validator_Fails_WhenOneOrMoreCarsAreDamaged()
         {
             //Arrange
-            var validator = new RentalValidator();
+            var validator = new RentalDtoValidator();
             var cars = GetCarList();
             cars.First().State = CarState.Damaged;
-            var client = new Client();
-            var rental = new Rental
+            var client = new ClientDto();
+            var rental = new RentalDto
             {
                 Client = client,
                 RentedCars = cars,
@@ -35,10 +36,10 @@ namespace CarRentalsTests.Validators
         public async Task Validator_Fails_WhenStartTimeIsGreaterThanEndTime()
         {
             //Arrange
-            var validator = new RentalValidator();
+            var validator = new RentalDtoValidator();
             var cars = GetCarList();
-            var client = new Client();
-            var rental = new Rental
+            var client = new ClientDto();
+            var rental = new RentalDto
             {
                 Client = client,
                 RentedCars = cars,
@@ -56,10 +57,10 @@ namespace CarRentalsTests.Validators
         public void Validator_Fails_WhenCarsListIsEmpty()
         {
             //Arrange
-            var validator = new RentalValidator();
-            var cars = new List<Car>();
-            var client = new Client();
-            var rental = new Rental
+            var validator = new RentalDtoValidator();
+            var cars = new List<CarDto>();
+            var client = new ClientDto();
+            var rental = new RentalDto
             {
                 Client = client,
                 RentedCars = cars,
@@ -75,10 +76,10 @@ namespace CarRentalsTests.Validators
         [Fact]
         public void Validator_Pass_WhenArgumentsAreCorrect()
         {
-            var validator = new RentalValidator();
+            var validator = new RentalDtoValidator();
             var cars = GetCarList();
-            var client = new Client();
-            var rental = new Rental
+            var client = new ClientDto();
+            var rental = new RentalDto
             {
                 Client = client,
                 RentedCars = cars,
@@ -91,13 +92,13 @@ namespace CarRentalsTests.Validators
             Assert.True(result.IsValid);
         }
 
-        private IEnumerable<Car> GetCarList()
+        private IEnumerable<CarDto> GetCarList()
         {
-            return new List<Car>
+            return new List<CarDto>
             {
-                new Car { Id = Guid.NewGuid(), Brand = "Brand2", LicensePlate = "BBB-666", Model = "Model2", Type = "SEDAN", State = CarState.Available },
-                new Car { Id = Guid.NewGuid(), Brand = "Brand3", LicensePlate = "CCC-777", Model = "Model3", Type = "MINIVAN", State = CarState.Available },
-                new Car { Id = Guid.NewGuid(), Brand = "Brand4", LicensePlate = "DDD-888", Model = "Model4", Type = "COUPE", State = CarState.Available },
+                new CarDto { Id = Guid.NewGuid(), Brand = "Brand2", LicensePlate = "BBB-666", Model = "Model2", Type = "SEDAN", State = CarState.Available },
+                new CarDto { Id = Guid.NewGuid(), Brand = "Brand3", LicensePlate = "CCC-777", Model = "Model3", Type = "MINIVAN", State = CarState.Available },
+                new CarDto { Id = Guid.NewGuid(), Brand = "Brand4", LicensePlate = "DDD-888", Model = "Model4", Type = "COUPE", State = CarState.Available },
             };
         }
     }

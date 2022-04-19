@@ -23,7 +23,10 @@ namespace CarRentals.Repositories
 
         public async Task<IEnumerable<Rental>> GetAsync()
         {
-            return await _context.Rentals.ToListAsync();
+            return await _context.Rentals
+                .Include(rental => rental.Client)
+                .Include(rental => rental.RentedCars)
+                .ToListAsync();
         }
 
         public async Task<Rental> GetByIDAsync(Guid id)
@@ -35,6 +38,11 @@ namespace CarRentals.Repositories
 
         public async Task SaveAsync(Rental rental)
         {
+            _context.Entry(rental.Client).State = EntityState.Modified;
+            foreach (var car in rental.RentedCars)
+            {
+                _context.Entry(car).State = EntityState.Unchanged;
+            }
             _context.Rentals.Add(rental);
             await _context.SaveChangesAsync();
         }

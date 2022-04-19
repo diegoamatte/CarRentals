@@ -1,32 +1,32 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
 using CarRentals.Validators;
 using System;
 using Xunit;
 
 namespace CarRentalsTests.Validators
 {
-    public class CarValidatorTests
+    public class CarDtoValidatorTests
     {
-        private Car _car;
-        private readonly CarValidator _carValidator;
+        private CarDto _validCar;
+        private readonly CarDtoValidator _carValidator;
 
-        public CarValidatorTests()
+        public CarDtoValidatorTests()
         {
-            _car = new Car { 
+            _validCar = new CarDto { 
                 Brand = "Brand", 
                 Id = Guid.NewGuid(), 
                 Model = "ValidModel", 
                 Type = "Valid type",
                 LicensePlate = "AAA-555",
             };
-            _carValidator = new CarValidator();
+            _carValidator = new CarDtoValidator();
         }
 
         [Fact]
         public void Validator_IsnotValid_WhenFieldsAreEmpty()
         {
             //Arrange
-            var car = new Car();
+            var car = new CarDto();
 
             //Act
             var result = _carValidator.Validate(car);
@@ -36,13 +36,20 @@ namespace CarRentalsTests.Validators
         }
 
         [Fact]
-        public void Validator_IsNotValid_WhenLicensePlateHasNotMinimumLengthRequired()
+        public void Validator_IsNotValid_WhenLicensePlateIsInvalid()
         {
             //Arrange
-            _car.LicensePlate = "AAAAA";
+            var car = new CarDto { 
+                Brand = _validCar.Brand,
+                Id = _validCar.Id,
+                LicensePlate = "AAA",
+                Model = _validCar.Model,
+                State = _validCar.State,
+                Type = _validCar.Type,
+            };
 
             //Act
-            var result = _carValidator.Validate(_car);
+            var result = _carValidator.Validate(car);
 
             //Assert
             Assert.False(result.IsValid);

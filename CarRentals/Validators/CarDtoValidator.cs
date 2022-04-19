@@ -1,12 +1,12 @@
-﻿using CarRentals.Models;
+﻿using CarRentals.DTOs;
 using FluentValidation;
 
 namespace CarRentals.Validators
 {
-    public class CarValidator : AbstractValidator<Car>
+    public class CarDtoValidator : AbstractValidator<CarDto>
     {
         private readonly string _licenseRegexPattern = "[A-Z]{3}-[0-9]{3}|[A-Z]{2}-[0-9]{3}-[A-Z]{2}";
-        public CarValidator()
+        public CarDtoValidator()
         {
             RuleFor(x => x.Brand)
                 .NotEmpty()
@@ -16,8 +16,6 @@ namespace CarRentals.Validators
             RuleFor(x => x.LicensePlate)
                 .NotEmpty()
                 .Matches(_licenseRegexPattern);
-            RuleFor(x => x.Id)
-                .NotEmpty();
             RuleFor(x => x.Type)
                 .NotEmpty();
         }
